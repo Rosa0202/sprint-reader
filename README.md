@@ -1,5 +1,5 @@
 # Project 3 — The 7-Minute Sprint Reader
-## 凱基金控 · 數位金融儲備幹部 Mini Project
+## 凱基金控 · 金融數位科技儲備幹部 Mini Project
 
 ---
 
