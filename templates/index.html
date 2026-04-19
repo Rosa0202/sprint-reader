@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>The 7-Minute Sprint Reader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Serif+TC:wght@700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080c;--surface:#0d0f16;--card:#12151f;--card2:#161a26;
+  --border:#1c2033;--gold:#c9a84c;--gold-dim:rgba(201,168,76,.12);
+  --gold-glow:rgba(201,168,76,.25);--blue:#4a84f0;--red:#e05252;
+  --green:#3ecf6e;--text:#dde1ed;--text-mid:#8892a4;--text-dim:#454e62;--r:18px;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");pointer-events:none;z-index:999}
+#app{width:100%;max-width:430px;height:100vh;max-height:900px;position:relative;overflow:hidden;border-left:1px solid var(--border);border-right:1px solid var(--border)}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .35s ease,transform .35s ease;transform:translateY(16px);overflow:hidden}
+.screen.active{opacity:1;pointer-events:all;transform:translateY(0)}
+
+/* ── LOGIN ── */
+#screen-login{background:var(--bg);justify-content:center;align-items:center;padding:48px 32px}
+.login-logo{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.22em;color:var(--gold);text-transform:uppercase;margin-bottom:44px;display:flex;align-items:center;gap:10px;width:100%}
+.login-logo::before,.login-logo::after{content:'';flex:1;height:1px;background:rgba(201,168,76,.25)}
+.login-title{font-family:'Noto Serif TC',serif;font-size:28px;margin-bottom:8px;text-align:center;width:100%}
+.login-sub{font-size:13px;color:var(--text-mid);margin-bottom:40px;text-align:center;font-weight:300;width:100%}
+.login-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;display:block;width:100%}
+.login-input{width:100%;padding:15px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:10px}
+.login-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim)}
+.login-input::placeholder{color:var(--text-dim)}
+.login-error{font-size:12px;color:var(--red);font-family:'DM Mono',monospace;min-height:18px;margin-bottom:10px;width:100%}
+.btn-login{width:100%;padding:16px;background:var(--gold);color:#07080c;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 0 24px var(--gold-glow)}
+.btn-login:hover{background:#d9b85a;transform:translateY(-1px)}
+
+/* ── MODULE SELECT ── */
+#screen-select{background:var(--bg);padding:0}
+.select-header{padding:52px 28px 24px;background:linear-gradient(180deg,var(--surface) 0%,transparent 100%);border-bottom:1px solid var(--border)}
+.kgi-wordmark{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.kgi-wordmark::before{content:'';width:20px;height:1px;background:var(--gold)}
+.agent-chip{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);margin-bottom:16px}
+.select-header h1{font-family:'Noto Serif TC',serif;font-size:26px;line-height:1.3;color:var(--text);margin-bottom:6px}
+.select-header p{font-size:13px;color:var(--text-mid);font-weight:300}
+.module-list{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:12px}
+.module-list::-webkit-scrollbar{width:0}
+.module-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;cursor:pointer;transition:border-color .2s,background .2s,transform .15s;position:relative;overflow:hidden}
+.module-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--gold-dim) 0%,transparent 60%);opacity:0;transition:opacity .2s}
+.module-card:hover{border-color:var(--gold);background:var(--card2);transform:translateY(-1px)}
+.module-card:hover::before{opacity:1}
+.mc-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:.12em;margin-bottom:10px}
+.mc-title{font-size:15px;font-weight:600;line-height:1.4;margin-bottom:10px}
+.mc-source{font-size:11px;color:var(--text-mid);font-style:italic;margin-bottom:12px;line-height:1.4}
+.mc-tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:13px;font-family:'DM Mono',monospace;padding:4px 10px;border-radius:6px;background:var(--gold-dim);color:var(--gold);letter-spacing:.06em;cursor:default;user-select:none}
+.mc-arrow{position:absolute;right:20px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:18px;transition:color .2s,right .2s}
+.module-card:hover .mc-arrow{color:var(--gold);right:16px}
+.select-footer{padding:16px 28px;border-top:1px solid var(--border);font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:8px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+/* ── SPLASH ── */
+#screen-splash{background:var(--bg);justify-content:space-between}
+.splash-top{padding:52px 32px 0;display:flex;flex-direction:column;align-items:center;text-align:center}
+.splash-badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid rgba(201,168,76,.3);border-radius:30px;margin-bottom:32px}
+.splash-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.splash-doc{font-size:11px;color:var(--text-mid);letter-spacing:.06em;font-family:'DM Mono',monospace;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.splash-doc::before{content:'📄';font-size:12px}
+.splash-title{font-family:'Noto Serif TC',serif;font-size:28px;line-height:1.35;margin-bottom:24px;color:var(--text);text-align:center}
+.splash-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px;justify-content:center}
+.splash-info-box{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.splash-info-row{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--text-mid)}
+.splash-info-row strong{color:var(--text);font-weight:500}
+.splash-info-icon{font-size:16px;width:20px;text-align:center}
+.splash-bottom{padding:28px 32px 44px}
+.btn-start{width:100%;padding:18px;background:var(--gold);color:#07080c;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s,transform .15s,box-shadow .2s;box-shadow:0 0 30px var(--gold-glow)}
+.btn-start:hover{background:#d9b85a;transform:translateY(-1px)}
+.btn-back{width:100%;margin-top:12px;padding:14px;background:transparent;color:var(--text-mid);border:1px solid var(--border);border-radius:14px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:border-color .2s,color .2s}
+.btn-back:hover{border-color:var(--text-dim);color:var(--text)}
+
+/* ── READER ── */
+#screen-reader{background:var(--bg)}
+.reader-topbar{padding:16px 20px 12px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+.topbar-row1{display:flex;align-items:center;justify-content:space-between}
+.progress-label{font-family:'DM Mono',monospace;font-size:14px;color:var(--text);letter-spacing:.08em;font-weight:500}
+.progress-label span{color:var(--gold);font-weight:700}
+.timer-display{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--text);transition:color .3s;display:flex;align-items:center;gap:6px}
+.timer-display.warning{color:var(--red)}
+/* progress bar removed */
+.topbar-row2{display:flex;align-items:center;justify-content:space-between}
+.current-tag{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:.1em;font-weight:500}
+.cards-viewport{flex:1;overflow:hidden;position:relative}
+.card-track{display:flex;height:100%;transition:transform .4s cubic-bezier(.25,.46,.45,.94)}
+.flash-card{min-width:100%;height:100%;padding:36px 28px 28px;display:flex;flex-direction:column;justify-content:flex-start;overflow-y:auto}
+.flash-card::-webkit-scrollbar{width:0}
+.card-seq{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);letter-spacing:.15em;margin-bottom:24px}
+.card-title{font-family:'Noto Serif TC',serif;font-size:22px;line-height:1.4;color:var(--text);margin-bottom:16px;padding-top:8px}
+.card-divider{width:32px;height:2px;background:var(--gold);border-radius:1px;margin-bottom:24px;flex-shrink:0}
+.card-body{font-size:15px;line-height:1.8;color:var(--text-mid);font-weight:300}
+.swipe-controls{padding:12px 20px 32px;display:flex;gap:10px;flex-shrink:0}
+.btn-nav{flex:1;padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text-mid);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-nav:hover{border-color:var(--gold);color:var(--gold)}
+.btn-nav:disabled{opacity:.25;cursor:not-allowed}
+.btn-nav-next{background:var(--gold);border-color:var(--gold);color:#07080c;font-weight:600;flex:2}
+.btn-nav-next:hover{background:#d9b85a;border-color:#d9b85a;color:#07080c}
+
+/* ── CARD DOTS ── */
+.card-dots{display:flex;gap:8px;padding:6px 0 2px;justify-content:center}
+.card-dot{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--border);
+  transition:background .3s,transform .2s;
+  flex-shrink:0;
+  cursor:pointer;
+}
+.card-dot.remembered{background:var(--gold)}
+.card-dot.review{background:var(--border)}
+.card-dot.current{transform:scale(1.7);box-shadow:0 0 8px rgba(201,168,76,.6)}
+
+/* ── REVIEW BUTTONS ── */
+.btn-review{
+  flex:1;padding:14px;border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--card);
+  font-family:'DM Sans',sans-serif;font-size:14px;
+  cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn-review-again{color:var(--gold);border-color:rgba(201,168,76,.3)}
+.btn-review-again:hover{background:rgba(201,168,76,.1);border-color:var(--gold)}
+.btn-review-remembered{
+  background:var(--gold);border-color:var(--gold);
+  color:#07080c;font-weight:600;flex:1;
+}
+.btn-review-remembered:hover{background:#d9b85a;border-color:#d9b85a}
+.btn-finish{
+  width:100%;padding:14px;border-radius:12px;
+  background:var(--gold);border:none;
+  color:#07080c;font-family:'DM Sans',sans-serif;
+  font-size:14px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  opacity:0;pointer-events:none;
+  margin-top:8px;
+  transition:opacity .3s,background .2s;
+}
+.btn-finish:hover{background:#d9b85a}
+.btn-finish.show{opacity:1;pointer-events:all}
+#lock-overlay{
+  position:absolute;inset:0;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:20px;
+  z-index:500;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s ease;
+}
+#lock-overlay.show{opacity:1;pointer-events:all}
+.lock-icon{
+  font-size:48px;
+  animation:lockPulse 1s ease-in-out infinite;
+}
+@keyframes lockPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.lock-title{
+  font-family:'Noto Serif TC',serif;
+  font-size:22px;color:var(--text);
+  animation:fadeUp .4s ease both;
+}
+.lock-sub{
+  font-size:13px;color:var(--text-mid);
+  font-family:'DM Mono',monospace;
+  letter-spacing:.06em;
+  animation:fadeUp .4s .15s ease both;
+}
+.lock-dots{
+  display:flex;gap:6px;
+  animation:fadeUp .4s .25s ease both;
+}
+.lock-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--gold);
+  animation:dotBounce 1s ease-in-out infinite;
+}
+.lock-dot:nth-child(2){animation-delay:.15s}
+.lock-dot:nth-child(3){animation-delay:.3s}
+@keyframes dotBounce{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-6px);opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── LOGIN 背景光暈 ── */
+#screen-login::before{
+  content:'';position:absolute;
+  bottom:-100px;left:-80px;
+  width:320px;height:320px;
+  background:radial-gradient(circle,rgba(201,168,76,.07) 0%,transparent 70%);
+  border-radius:50%;pointer-events:none;
+}
+#screen-login::after{
+  content:'';position:absolute;
+  top:-60px;right:-60px;
+  width:200px;height:200px;
+  background:radial-gradient(circle,rgba(201,168,76,.05) 0%,transparent 70%);
+  border-radius:50%;pointer-events:none;
+}
+
+/* ── 卡片進場動畫 ── */
+@keyframes cardEnter{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.flash-card.entering .card-title,
+.flash-card.entering .card-divider,
+.flash-card.entering .card-body{
+  animation:cardEnter .35s ease both;
+}
+.flash-card.entering .card-divider{animation-delay:.05s}
+.flash-card.entering .card-body{animation-delay:.1s}
+
+/* ── 點擊方向指示 ── */
+.tap-hint{
+  position:absolute;top:50%;transform:translateY(-50%);
+  font-size:28px;color:rgba(201,168,76,.6);
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .15s;
+  z-index:6;
+}
+.tap-hint.show{opacity:1}
+.tap-hint-prev{left:16px}
+.tap-hint-next{right:16px}
+
+/* ── 完成按鈕彈起動畫 ── */
+@keyframes finishPop{
+  0%{opacity:0;transform:translateY(16px) scale(.95)}
+  60%{transform:translateY(-3px) scale(1.02)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+.btn-finish.show{
+  opacity:1;pointer-events:all;
+  animation:finishPop .45s cubic-bezier(.34,1.56,.64,1) both;
+  box-shadow:0 0 28px rgba(62,207,110,.35);
+}
+
+/* ── Lock Overlay SVG 圓形 ── */
+.lock-svg-ring{
+  width:72px;height:72px;
+  animation:ringRotate 2s linear infinite;
+}
+@keyframes ringRotate{to{transform:rotate(360deg)}}
+#screen-complete{background:var(--bg);justify-content:center;align-items:center;text-align:center;padding:40px 32px;gap:0;overflow-y:auto}
+.complete-ring{width:80px;height:80px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:24px;animation:ringPop .5s cubic-bezier(.34,1.56,.64,1) both;box-shadow:0 0 30px var(--gold-glow);flex-shrink:0}
+@keyframes ringPop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.complete-title{font-family:'Noto Serif TC',serif;font-size:26px;margin-bottom:8px}
+.complete-sub{font-size:13px;color:var(--text-mid);margin-bottom:28px}
+.complete-stats{width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:14px;margin-bottom:16px;text-align:left}
+.stat-row{display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.stat-label{color:var(--text-mid)}
+.stat-value{font-family:'DM Mono',monospace;font-size:12px;color:var(--text)}
+.stat-value.warn{color:var(--red)}
+.stat-value.good{color:var(--green)}
+.complete-session{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);margin-bottom:20px;padding:10px 16px;border:1px solid var(--border);border-radius:8px;width:100%;text-align:left;line-height:1.8}
+.btn-quiz{width:100%;padding:18px;background:var(--gold);color:#07080c;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 0 30px var(--gold-glow);display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-quiz:hover{background:#d9b85a;transform:translateY(-1px)}
+.btn-home{width:100%;margin-top:10px;padding:14px;background:transparent;color:var(--text-mid);border:1px solid var(--border);border-radius:14px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .2s}
+.btn-home:hover{border-color:var(--text-dim);color:var(--text)}
+
+/* ── TELEMETRY ── */
+.tele-fab{position:absolute;bottom:24px;right:24px;width:44px;height:44px;background:var(--card);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;z-index:200;transition:border-color .2s}
+.tele-fab:hover{border-color:var(--gold)}
+.tele-drawer{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:430px;background:var(--surface);border-top:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px 20px 36px;z-index:300;transition:transform .35s cubic-bezier(.25,.46,.45,.94);max-height:60vh;display:flex;flex-direction:column}
+.tele-drawer.open{transform:translateX(-50%) translateY(0)}
+.tele-handle{width:36px;height:3px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.tele-title{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:.15em;margin-bottom:14px}
+.tele-content{overflow-y:auto;flex:1;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-mid);line-height:1.9}
+.tele-content::-webkit-scrollbar{width:0}
+.tele-row{padding:8px 0;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:3px}
+.tele-row:last-child{border-bottom:none}
+.tele-id{color:var(--text-dim);font-size:10px}
+.tele-status{display:inline-block;padding:2px 7px;border-radius:4px;font-size:9px;letter-spacing:.08em}
+.tele-status.finished_early{background:rgba(62,207,110,.1);color:var(--green)}
+.tele-status.timed_out{background:rgba(74,132,240,.1);color:var(--blue)}
+.tele-status.abandoned{background:rgba(224,82,82,.1);color:var(--red)}
+.tele-status.in_progress{background:rgba(201,168,76,.1);color:var(--gold)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ① LOGIN -->
+  <div class="screen active" id="screen-login">
+    <div class="login-logo">Sprint Reader</div>
+    <div class="login-title">歡迎回來</div>
+    <div class="login-sub">請輸入您的員工工號以繼續</div>
+    <label class="login-label" for="input-agent">員工工號</label>
+    <input class="login-input" id="input-agent" type="text"
+           placeholder="例：10234" maxlength="20" autocomplete="off"/>
+    <div class="login-error" id="login-error"></div>
+    <button class="btn-login" id="btn-login">進入學習系統 →</button>
+  </div>
+
+  <!-- ② MODULE SELECT -->
+  <div class="screen" id="screen-select">
+    <div class="select-header">
+      <div class="kgi-wordmark">Sprint Reader</div>
+      <div class="agent-chip" id="agent-chip"></div>
+      <h1>選擇學習模組</h1>
+      <p>選擇一個七分鐘衝刺，開始今天的知識強化</p>
+    </div>
+    <div class="module-list" id="module-list">
+      <div style="color:var(--text-dim);font-size:13px;padding:20px;text-align:center">載入模組中...</div>
+    </div>
+    <div class="select-footer">
+      <div class="dot"></div>
+      系統運作正常 · SQLite
+    </div>
+  </div>
+
+  <!-- ③ SPLASH -->
+  <div class="screen" id="screen-splash">
+    <div class="splash-top">
+      <div class="splash-badge">
+        <span class="splash-badge-dot"></span>Sprint 閱讀器
+      </div>
+      <div class="splash-title" id="splash-title">—</div>
+      <div class="splash-tags" id="splash-tags"></div>
+      <div class="splash-info-box">
+        <div style="font-size:13px;line-height:2;color:var(--text)">
+          您有 <strong>7 分鐘</strong><br>
+          閱讀 <strong id="splash-cards">5</strong> 張卡片。<br>
+          閱讀結束後立即進行 <strong>3 題測驗</strong>。
+        </div>
+        <div style="margin-top:8px;padding:10px 14px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:10px;font-size:12px;color:var(--text-mid)">
+          ⏸ 切換分頁時計時將自動暫停，並記錄切換次數。
+        </div>
+      </div>
+    </div>
+    <div class="splash-bottom">
+      <button class="btn-start" id="btn-start">開始衝刺 →</button>
+      <button class="btn-back" id="btn-back-splash">← 返回選擇</button>
+    </div>
+  </div>
+
+  <!-- ④ READER -->
+  <div class="screen" id="screen-reader">
+    <div class="reader-topbar">
+      <!-- 第一行：卡片進度 + 計時器 + 已掌握 -->
+      <div class="topbar-row1" style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center">
+        <div class="progress-label">
+          卡片 <span id="cur-card">1</span> / <span id="total-cards">5</span>
+        </div>
+        <div class="timer-display" id="timer-display">
+          <span>⏱</span><span id="timer-text">7:00</span>
+        </div>
+        <div id="mastery-text" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:.06em;text-align:right">開始學習</div>
+      </div>
+      <!-- 第二行：標籤 -->
+      <div id="current-tag" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:100%"></div>
+      <!-- 第三行：點點 -->
+      <div class="card-dots" id="card-dots"></div>
+      <!-- 隱藏的 tab-count，供 JS 更新用，完成畫面才顯示 -->
+      <span id="tab-count" style="display:none">0</span>
+    </div>
+    <div class="cards-viewport" style="position:relative;flex:1;overflow:hidden">
+      <div class="card-track" id="card-track"></div>
+      <div class="tap-hint tap-hint-prev" id="hint-prev">‹</div>
+      <div class="tap-hint tap-hint-next" id="hint-next">›</div>
+      <!-- 左半部點擊：上一頁 -->
+      <div id="tap-prev" style="position:absolute;left:0;top:0;width:50%;height:100%;z-index:5;cursor:pointer"></div>
+      <!-- 右半部點擊：下一頁 -->
+      <div id="tap-next" style="position:absolute;right:0;top:0;width:50%;height:100%;z-index:5;cursor:pointer"></div>
+    </div>
+    <div style="padding:10px 20px 28px;flex-shrink:0" id="btn-area">
+      <div style="display:flex;gap:10px" id="btn-review-row">
+        <button class="btn-review btn-review-again" id="btn-again">需要再看</button>
+        <button class="btn-review btn-review-remembered" id="btn-remembered">記住了 ✓</button>
+      </div>
+      <button class="btn-finish" id="btn-finish" style="display:none;width:100%;opacity:1;pointer-events:all;margin-top:0">完成閱讀 ✓</button>
+    </div>
+  </div>
+
+  <!-- ⑤ COMPLETE -->
+  <div class="screen" id="screen-complete">
+    <div class="complete-ring" id="complete-ring">✓</div>
+    <div class="complete-title">閱讀完成！</div>
+    <div class="complete-stats" id="complete-stats"></div>
+    <button class="btn-quiz" id="btn-quiz">前往測驗 →</button>
+    <button class="btn-home" id="btn-home">返回首頁</button>
+    <!-- 點擊前往測驗後顯示的動畫覆蓋層 -->
+    <div id="generating-overlay" style="position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;opacity:0;pointer-events:none;transition:opacity .3s">
+      <div class="lock-dots">
+        <div class="lock-dot"></div>
+        <div class="lock-dot"></div>
+        <div class="lock-dot"></div>
+      </div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:18px;color:var(--text-mid);letter-spacing:.04em;font-weight:500">正在生成測驗...</div>
+    </div>
+  </div>
+
+<!-- 🔒 LOCK OVERLAY -->
+  <!-- 🔒 LOCK OVERLAY -->
+  <div id="lock-overlay">
+    <svg class="lock-svg-ring" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="36" cy="36" r="30" stroke="rgba(201,168,76,.15)" stroke-width="3"/>
+      <circle cx="36" cy="36" r="30" stroke="var(--gold)" stroke-width="3"
+        stroke-dasharray="48 140" stroke-linecap="round"/>
+      <circle cx="36" cy="36" r="18" stroke="rgba(201,168,76,.2)" stroke-width="1.5"/>
+      <text x="36" y="41" text-anchor="middle" font-size="16" fill="var(--gold)">✓</text>
+    </svg>
+    <div class="lock-title">閱讀完成</div>
+    <div class="lock-sub">正在生成測驗...</div>
+    <div class="lock-dots">
+      <div class="lock-dot"></div>
+      <div class="lock-dot"></div>
+      <div class="lock-dot"></div>
+    </div>
+  </div>
+
+  <!-- 📊 TELEMETRY FAB（在 app 內部，才不會跑出去）-->
+  <button class="tele-fab" id="tele-fab">📊</button>
+
+</div>
+
+<div class="tele-drawer" id="tele-drawer">
+  <div class="tele-handle"></div>
+  <div class="tele-title">TELEMETRY LOG · SprintSessions</div>
+  <div class="tele-content" id="tele-content">載入中...</div>
+</div>
+
+<script>
+const state = {
+  agentId: null,
+  modules: [], currentModule: null,
+  cards: [],           // 原始 5 張卡片
+  queue: [],           // 當前輪次的播放佇列（page_id 陣列）
+  cardStatus: {},      // {page_id: 'pending'|'review'|'remembered'}
+  cardRounds: {},      // {page_id: number} 每張卡片被看了幾次
+  currentQueueIndex: 0,
+  navIndex: 0,         // 左右導航用，走原始 5 張順序
+  sprintId: null, quizSessionId: null,
+  totalSeconds: 420, secondsLeft: 420,
+  timerInterval: null, isPaused: false,
+  tabSwitchCount: 0, cardDwell: [], cardStartTime: null,
+};
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
+}
+
+/* ─ 修改一：LOGIN ─ */
+document.getElementById('btn-login').addEventListener('click', handleLogin);
+document.getElementById('input-agent').addEventListener('keydown', e=>{ if(e.key==='Enter') handleLogin(); });
+
+function handleLogin(){
+  const val = document.getElementById('input-agent').value.trim();
+  const err = document.getElementById('login-error');
+  if(!val){ err.textContent='請輸入員工工號'; return; }
+  err.textContent='';
+  state.agentId = val;
+  document.getElementById('agent-chip').textContent = `登入身份：${val}`;
+  loadModules();
+  showScreen('screen-select');
+}
+
+/* ─ MODULE SELECT ─ */
+async function loadModules(){
+  try{
+    const res = await fetch('/api/modules');
+    state.modules = await res.json();
+    const el = document.getElementById('module-list');
+    el.innerHTML = state.modules.map(m=>{
+      const tags = JSON.parse(m.domain_tags||'[]');
+      return `<div class="module-card" data-id="${m.module_id}">
+        <div class="mc-meta">${m.total_cards} 張卡片 · 7 分鐘</div>
+        <div class="mc-title">${m.title}</div>
+        <div class="mc-source">${m.source_document}</div>
+        <div class="mc-tags">${tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+        <div class="mc-arrow">›</div>
+      </div>`;
+    }).join('');
+    el.querySelectorAll('.module-card').forEach(card=>{
+      card.addEventListener('click',()=>selectModule(card.dataset.id));
+    });
+  }catch(e){
+    document.getElementById('module-list').innerHTML=`<div style="color:var(--red);padding:20px;font-size:13px">載入失敗</div>`;
+  }
+}
+
+async function selectModule(id){
+  const res = await fetch(`/api/modules/${id}`);
+  const data = await res.json();
+  state.currentModule = data; state.cards = data.cards;
+  document.getElementById('splash-title').textContent = data.title;
+  document.getElementById('splash-cards').textContent = data.total_cards;
+  document.getElementById('splash-tags').innerHTML = data.domain_tags.map(t=>`<span class="tag">${t}</span>`).join('');
+  showScreen('screen-splash');
+}
+
+document.getElementById('btn-start').addEventListener('click', startSprint);
+document.getElementById('btn-back-splash').addEventListener('click',()=>showScreen('screen-select'));
+
+/* ─ SPRINT START ─ */
+async function startSprint(){
+  state.secondsLeft = state.totalSeconds;
+  state.tabSwitchCount = 0; state.cardDwell = []; state.cardStartTime = Date.now();
+  state.currentQueueIndex = 0;
+  state.navIndex = 0;
+  document.getElementById('tab-count').textContent = '0';
+  document.getElementById('mastery-text').textContent = '開始學習';
+  document.getElementById('btn-review-row').style.display = 'flex';
+  document.getElementById('btn-finish').style.display = 'none';
+  state.cardStatus = {};
+  state.cardRounds = {};
+  state.cards.forEach(c => {
+    state.cardStatus[c.page_id] = 'pending';
+    state.cardRounds[c.page_id] = 0;
+  });
+  state.queue = state.cards.map(c => c.page_id);
+
+  try{
+    const res = await fetch('/api/sessions/start',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({module_id: state.currentModule.module_id, agent_id: state.agentId})
+    });
+    state.sprintId = (await res.json()).sprint_id;
+  }catch(e){}
+
+  buildCards();
+  renderDots();
+
+  const track = document.getElementById('card-track');
+  track.style.transition = 'none';
+  track.style.transform = 'translateX(0)';
+  requestAnimationFrame(()=>{ track.style.transition = ''; });
+
+  showScreen('screen-reader');
+  updateCardUI();
+
+  clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(()=>{
+    if(state.isPaused) return;
+    state.secondsLeft--;
+    const m = Math.floor(state.secondsLeft/60), s = state.secondsLeft%60;
+    document.getElementById('timer-text').textContent = `${m}:${String(s).padStart(2,'0')}`;
+    document.getElementById('timer-display').classList.toggle('warning', state.secondsLeft<=60);
+    if(state.secondsLeft<=0){ clearInterval(state.timerInterval); endSprint('timed_out'); }
+  }, 1000);
+}
+
+/* ─ BUILD CARDS ─ */
+function buildCards(){
+  const track = document.getElementById('card-track');
+  track.innerHTML = state.cards.map(c => {
+    const ct = c.page_content_json;
+    return `<div class="flash-card" data-page-id="${c.page_id}">
+      <div class="card-title">${ct.title}</div>
+      <div class="card-divider"></div>
+      <div class="card-body">${ct.body.replace(/\n/g,'<br>')}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ─ DOTS ─ */
+function renderDots(){
+  const el = document.getElementById('card-dots');
+  el.innerHTML = state.cards.map((c,i) => {
+    const status = state.cardStatus[c.page_id] || 'pending';
+    const isCurrent = i === state.navIndex;  // 用 navIndex 判斷當前位置
+    return `<div class="card-dot ${status} ${isCurrent?'current':''}"
+      title="Card ${i+1}"
+      data-page-id="${c.page_id}"
+      data-card-idx="${i}"></div>`;
+  }).join('');
+
+  // 點擊小點跳到該卡片（只移動畫面，不改變佇列邏輯）
+  el.querySelectorAll('.card-dot').forEach(dot => {
+    dot.addEventListener('click', ()=>{
+      const idx = parseInt(dot.dataset.cardIdx);
+      recordDwell();
+      // 把點擊的卡片插入佇列當前位置
+      const pageId = dot.dataset.pageId;
+      // 先把這張插到佇列最前面（若不在佇列中就加入）
+      if(!state.queue.includes(pageId)){
+        state.queue.splice(state.currentQueueIndex, 0, pageId);
+      } else {
+        // 已在佇列中，直接跳到那個位置
+        const qIdx = state.queue.indexOf(pageId);
+        state.currentQueueIndex = qIdx;
+      }
+      document.getElementById('card-track').style.transform = `translateX(-${idx*100}%)`;
+      document.getElementById('cur-card').textContent = idx + 1;
+      // 重新計算進度條
+      const remembered = Object.values(state.cardStatus).filter(s=>s==='remembered').length;
+      updateMasteryText(remembered, state.cards.length);
+      renderDots();
+      state.cardStartTime = Date.now();
+    });
+  });
+}
+
+/* ─ UPDATE UI ─ */
+function updateCardUI(){
+  const pageId = state.queue[state.currentQueueIndex];
+  if(!pageId) return;
+  const cardIdx = state.cards.findIndex(c => c.page_id === pageId);
+  state.navIndex = cardIdx; // 同步 navIndex
+  document.getElementById('card-track').style.transform = `translateX(-${cardIdx * 100}%)`;
+  document.getElementById('cur-card').textContent = cardIdx + 1;
+  document.getElementById('total-cards').textContent = state.cards.length;
+  triggerCardEnter(cardIdx);
+  const remembered = Object.values(state.cardStatus).filter(s=>s==='remembered').length;
+  updateMasteryText(remembered, state.cards.length);
+  const tags = state.currentModule?.domain_tags || [];
+  document.getElementById('current-tag').innerHTML = tags.map(t=>`<span class="tag">${t}</span>`).join('');
+  renderDots();
+  checkFinishButton();
+}
+
+/* ─ MASTERY TEXT ─ */
+function updateMasteryText(remembered, total){
+  const pct = total === 0 ? 0 : Math.round((remembered / total) * 100);
+  let text;
+  if(pct === 0)       text = '開始學習';
+  else if(pct <= 20)  text = `已掌握 ${pct}% 暖身中`;
+  else if(pct <= 40)  text = `已掌握 ${pct}% 漸入佳境`;
+  else if(pct <= 60)  text = `已掌握 ${pct}% 過半了`;
+  else if(pct <= 80)  text = `已掌握 ${pct}% 快到了`;
+  else if(pct < 100)  text = `已掌握 ${pct}% 差一點`;
+  else                text = `已掌握 100% ！`;
+  document.getElementById('mastery-text').textContent = text;
+}
+
+/* ─ FINISH BUTTON ─ */
+function checkFinishButton(){
+  const remembered = Object.values(state.cardStatus).filter(s=>s==='remembered').length;
+  updateMasteryText(remembered, state.cards.length);
+  const allRemembered = remembered === state.cards.length;
+  document.getElementById('btn-review-row').style.display = allRemembered ? 'none' : 'flex';
+  document.getElementById('btn-finish').style.display = allRemembered ? 'block' : 'none';
+}
+
+/* ─ RECORD DWELL ─ */
+function recordDwell(){
+  if(!state.cardStartTime) return;
+  const dwell_ms = Date.now() - state.cardStartTime;
+  const pageId = state.queue[state.currentQueueIndex];
+  if(!pageId) return;
+  const card = state.cards.find(c => c.page_id === pageId);
+  if(!card) return;
+
+  // 這次離開，review_rounds +1
+  state.cardRounds[pageId] = (state.cardRounds[pageId] || 0) + 1;
+
+  const existing = state.cardDwell.find(c => c.page_id === pageId);
+  if(existing){
+    existing.dwell_ms += dwell_ms;
+    existing.review_rounds = state.cardRounds[pageId];
+    // card_status 會在 markCard 後更新，這裡先同步
+    existing.card_status = state.cardStatus[pageId] || 'pending';
+  } else {
+    state.cardDwell.push({
+      page_id: pageId,
+      dwell_ms,
+      review_rounds: state.cardRounds[pageId],
+      card_status: state.cardStatus[pageId] || 'pending'
+    });
+  }
+  state.cardStartTime = Date.now();
+}
+
+/* ─ MARK CARD ─ */
+function markCard(mark){
+  // 佇列已空（全部記住了），只允許按完成閱讀，不做其他動作
+  if(state.queue.length === 0) return;
+
+  recordDwell();
+  const pageId = state.queue[state.currentQueueIndex];
+  if(!pageId) return;
+
+  state.cardStatus[pageId] = mark;
+
+  // 同步最終 card_status 到 cardDwell
+  const dwellEntry = state.cardDwell.find(c => c.page_id === pageId);
+  if(dwellEntry) dwellEntry.card_status = mark;
+
+  state.currentQueueIndex++;
+
+  if(state.currentQueueIndex >= state.queue.length){
+    const nextQueue = state.cards
+      .filter(c => state.cardStatus[c.page_id] !== 'remembered')
+      .map(c => c.page_id);
+    if(nextQueue.length === 0){
+      state.queue = [];
+      renderDots();
+      checkFinishButton();
+      return;
+    }
+    state.queue = nextQueue;
+    state.currentQueueIndex = 0;
+  }
+  updateCardUI();
+}
+
+document.getElementById('btn-again').addEventListener('click', ()=> markCard('review'));
+document.getElementById('btn-remembered').addEventListener('click', ()=> markCard('remembered'));
+document.getElementById('btn-finish').addEventListener('click', ()=> endSprint('finished_early'));
+
+/* ─ TAP ZONES：左半部上一頁、右半部下一頁，走原始 5 張順序 ─ */
+document.getElementById('tap-prev').addEventListener('click', ()=>{
+  recordDwell();
+  if(state.navIndex > 0){
+    state.navIndex--;
+    showTapHint('prev');
+    navigateToCard(state.navIndex);
+  }
+});
+
+document.getElementById('tap-next').addEventListener('click', ()=>{
+  recordDwell();
+  if(state.navIndex < state.cards.length - 1){
+    state.navIndex++;
+    showTapHint('next');
+    navigateToCard(state.navIndex);
+  }
+});
+
+function showTapHint(side){
+  const el = document.getElementById(side==='prev'?'hint-prev':'hint-next');
+  if(!el) return;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 300);
+}
+
+function triggerCardEnter(idx){
+  const cards = document.querySelectorAll('.flash-card');
+  if(cards[idx]){
+    cards[idx].classList.remove('entering');
+    void cards[idx].offsetWidth;
+    cards[idx].classList.add('entering');
+  }
+}
+
+function navigateToCard(idx){
+  const pageId = state.cards[idx].page_id;
+  const qIdx = state.queue.indexOf(pageId);
+  if(qIdx !== -1) state.currentQueueIndex = qIdx;
+  document.getElementById('card-track').style.transform = `translateX(-${idx * 100}%)`;
+  document.getElementById('cur-card').textContent = idx + 1;
+  triggerCardEnter(idx);
+  renderDots();
+  state.cardStartTime = Date.now();
+}
+
+
+
+/* ─ 修改二：VISIBILITY API — 只暫停計時，不顯示 overlay ─ */
+document.addEventListener('visibilitychange', async ()=>{
+  const onReader=document.getElementById('screen-reader').classList.contains('active');
+  if(!onReader||!state.sprintId) return;
+  if(document.hidden){
+    state.isPaused=true;
+    state.tabSwitchCount++;
+    document.getElementById('tab-count').textContent = state.tabSwitchCount;
+    try{ await fetch(`/api/sessions/${state.sprintId}/tab-switch`,{method:'PATCH'}); }catch(e){}
+  }else{
+    state.isPaused=false;
+  }
+});
+
+/* ─ SPRINT COMPLETE ─ */
+async function endSprint(status){
+  clearInterval(state.timerInterval);
+  recordDwell();
+
+  const sprintId = state.sprintId;
+  state.sprintId = null;
+
+  let handoff=null;
+  try{
+    const res=await fetch(`/api/sessions/${sprintId}/complete`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({completion_status:status,card_dwell:state.cardDwell})
+    });
+    handoff=await res.json();
+  }catch(e){}
+
+  // 只有時間到才跑 lock overlay 動畫，按完成閱讀直接跳
+  if(status === 'timed_out'){
+    document.getElementById('lock-overlay').classList.add('show');
+    setTimeout(()=>{
+      document.getElementById('lock-overlay').classList.remove('show');
+      showCompleteScreen(status, handoff);
+    }, 1500);
+  } else {
+    showCompleteScreen(status, handoff);
+  }
+}
+
+function showCompleteScreen(status, handoff){
+  const statusLabel={finished_early:'提前完成',timed_out:'時間到',abandoned:'中途放棄'};
+  const statusColor={finished_early:'good',timed_out:'warn',abandoned:'warn'};
+
+  document.getElementById('complete-ring').textContent=status==='finished_early'?'✓':'⏱';
+
+  const used=state.totalSeconds-state.secondsLeft;
+
+  document.getElementById('complete-stats').innerHTML=`
+    <div class="stat-row">
+      <span class="stat-label">完成狀態</span>
+      <span class="stat-value ${statusColor[status]||''}">${statusLabel[status]||status}</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">使用時間</span>
+      <span class="stat-value">${Math.floor(used/60)}分 ${used%60}秒</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">分頁切換次數</span>
+      <span class="stat-value ${state.tabSwitchCount>=3?'warn':''}">${state.tabSwitchCount} 次</span>
+    </div>
+  `;
+
+  if(handoff){
+    state.quizSessionId = handoff.quiz_session_id || null;
+  }
+  showScreen('screen-complete');
+  startQuizCountdown();
+}
+
+/* ─ 倒數五秒自動跳轉測驗 ─ */
+let countdownTimer = null;
+
+function startQuizCountdown(){
+  clearInterval(countdownTimer);
+  let secs = 5;
+  const btn = document.getElementById('btn-quiz');
+  btn.textContent = `前往測驗 (${secs})`;
+
+  countdownTimer = setInterval(()=>{
+    secs--;
+    if(secs > 0){
+      btn.textContent = `前往測驗 (${secs})`;
+    } else {
+      clearInterval(countdownTimer);
+      goToQuiz();
+    }
+  }, 1000);
+}
+
+function goToQuiz(){
+  clearInterval(countdownTimer);
+  const btn = document.getElementById('btn-quiz');
+  btn.textContent = '前往測驗 →';
+  const overlay = document.getElementById('generating-overlay');
+  overlay.style.opacity = '1';
+  overlay.style.pointerEvents = 'all';
+  setTimeout(()=>{
+    alert(`交接 → 測驗引擎（P2）\nquiz_session_id: ${state.quizSessionId}`);
+    overlay.style.opacity = '0';
+    overlay.style.pointerEvents = 'none';
+  }, 1500);
+}
+
+document.getElementById('btn-home').addEventListener('click',()=>{
+  clearInterval(countdownTimer);
+  document.getElementById('btn-quiz').textContent = '前往測驗 →';
+  showScreen('screen-select');
+  loadTelemetry();
+});
+document.getElementById('btn-quiz').addEventListener('click', goToQuiz);
+
+/* ─ TELEMETRY ─ */
+document.getElementById('tele-fab').addEventListener('click',()=>{
+  if(document.getElementById('tele-drawer').classList.toggle('open')) loadTelemetry();
+});
+async function loadTelemetry(){
+  const el=document.getElementById('tele-content');
+  try{
+    const data=await(await fetch('/api/telemetry')).json();
+    if(!data.length){ el.innerHTML='<div style="color:var(--text-dim)">尚無記錄</div>'; return; }
+    el.innerHTML=data.map(r=>{
+      return `<div class="tele-row">
+        <div class="tele-id">${r.sprint_id.slice(0,8)}... · ${r.agent_id}</div>
+        <div>${r.title}</div>
+        <div><span class="tele-status ${r.completion_status}">${r.completion_status}</span> · 切換 ${r.tab_switch_count} 次</div>
+        <div style="color:var(--text-dim);font-size:10px">${r.start_timestamp?.slice(0,19)?.replace('T',' ')}</div>
+      </div>`;
+    }).join('');
+  }catch(e){ el.innerHTML=`<div style="color:var(--red)">${e.message}</div>`; }
+}
+document.addEventListener('click',e=>{
+  const d=document.getElementById('tele-drawer'),f=document.getElementById('tele-fab');
+  if(d.classList.contains('open')&&!d.contains(e.target)&&!f.contains(e.target)) d.classList.remove('open');
+});
+
+/* ─ ABANDONED：關閉或重新整理頁面時，標記未完成的 session ─ */
+window.addEventListener('beforeunload', ()=>{
+  // 只有在閱讀進行中才需要標記
+  if(!state.sprintId) return;
+  const onComplete = document.getElementById('screen-complete').classList.contains('active');
+  if(onComplete) return; // 已完成就不用標記
+  navigator.sendBeacon(
+    `/api/sessions/${state.sprintId}/complete`,
+    new Blob(
+      [JSON.stringify({ completion_status: 'abandoned', card_dwell: state.cardDwell })],
+      { type: 'application/json' }
+    )
+  );
+});
+</script>
+</body>
+</html>
